@@ -2,7 +2,7 @@
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
-{ config, pkgs, ... }:
+{ config, pkgs, nix-gaming, ... }:
 
 {
   imports =
@@ -23,7 +23,9 @@
   boot.loader.efi.canTouchEfiVariables = true;
 
   # Use latest kernel.
-  boot.kernelPackages = pkgs.linuxPackages_latest;
+   boot.kernelPackages = pkgs.linuxKernel.packagesFor (
+   pkgs.cachyosKernels.linux-cachyos-latest-x86_64-v3
+);
 
 hardware.firmware = [
   (pkgs.stdenv.mkDerivation {
@@ -100,7 +102,7 @@ hardware.firmware = [
   users.users."phloria" = {
     isNormalUser = true;
     description = "phloria";
-    extraGroups = [ "networkmanager" "wheel" ];
+    extraGroups = [ "networkmanager" "wheel" "gamemode" ];
    
     shell = pkgs.fish;
     
@@ -139,13 +141,27 @@ hardware.graphics = {
   '';
 };
 
+  # nix-ld
+programs.nix-ld.enable = true;
+
+
   # Uses tunedppd instead of normal ass ppd
   services.power-profiles-daemon.enable = false;
   services.tuned.enable = true;
 
   # le experimental features
-  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+  nix.settings = {
+  experimental-features = [ "nix-command" "flakes" ];
 
+  substituters = [
+    "https://cache.nixos.org/"
+    "https://attic.xuyh0120.win/lantian"
+  ];
+
+  trusted-public-keys = [
+    "lantian:EeAUQ+W+6r7EtwnmYjeVwx5kOGEBpjlBfPlzGlTNvHc="
+  ];
+};
 
 
 
@@ -184,6 +200,10 @@ hardware.graphics = {
     wine-staging
     winetricks
     starship
+    gamemode
+    ntfs3g
+    unrar
+    mpv
   ];
 
   # Some programs need SUID wrappers, can be configured further or are
