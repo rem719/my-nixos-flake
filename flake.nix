@@ -3,32 +3,77 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    
-    nix-cachyos-kernel.url = "github:xddxdd/nix-cachyos-kernel/release";
+
+    nix-cachyos-kernel.url =
+      "github:xddxdd/nix-cachyos-kernel/release";
+
+    prism-cracked.url =
+      "github:Diegiwg/PrismLauncher-Cracked";
+
+    anime-games-launcher.url =
+      "github:an-anime-team/anime-games-launcher";
+
+    helium-browser.url =
+      "github:schembriaiden/helium-browser-nix-flake";
+
+    nix-antigravity.url= "github:hieu313/nix-antigravity";
 
     nix-gaming = {
-  url = "github:fufexan/nix-gaming";
-  inputs.nixpkgs.follows = "nixpkgs";
-  };
-};
+      url = "github:fufexan/nix-gaming";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
-  outputs = { self, nixpkgs, nix-gaming, nix-cachyos-kernel }: {
+    zen-browser = {
+      url = "github:0xc000022070/zen-browser-flake";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+  };
+
+  outputs = inputs@{
+    self,
+    nixpkgs,
+    nix-gaming,
+    nix-cachyos-kernel,
+    prism-cracked,
+    anime-games-launcher,
+    helium-browser,
+    nix-antigravity,
+    ...
+  }: {
     nixosConfigurations.nixos = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
 
- specialArgs = {
-        inherit nix-gaming;
+      specialArgs = {
+        inherit inputs;
       };
 
       modules = [
         nix-gaming.nixosModules.platformOptimizations
+        anime-games-launcher.nixosModules.anime-games-launcher
 
-	 ({ ... }: {
+        ({ ... }: {
           nixpkgs.overlays = [
             nix-cachyos-kernel.overlays.pinned
+
+            (final: prev: {
+              windowmaker = prev.windowmaker.overrideAttrs (old: {
+                patches = (old.patches or []) ++ [
+                  ./windowmaker-randr.patch
+                ];
+              });
+
+              dockapps = prev.dockapps // {
+                wmcube = prev.dockapps.wmcube.overrideAttrs (old: {
+                  postPatch = ''
+                    substituteInPlace wmcube.c \
+                      --replace-fail "/usr/share/wmcube/" \
+                      "${placeholder "out"}/share/wmcube/"
+                  '';
+                });
+              };
+            })
           ];
         })
-
 
         ./configuration.nix
       ];

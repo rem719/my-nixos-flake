@@ -2,7 +2,7 @@
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
-{ config, pkgs, nix-gaming, ... }:
+{ config, pkgs, nix-gaming, prism-cracked, anime-games-launcher, inputs,  ... }:
 
 {
   imports =
@@ -23,9 +23,7 @@
   boot.loader.efi.canTouchEfiVariables = true;
 
   # Use latest kernel.
-   boot.kernelPackages = pkgs.linuxKernel.packagesFor (
-   pkgs.cachyosKernels.linux-cachyos-latest-x86_64-v3
-);
+   boot.kernelPackages = pkgs.cachyosKernels.linuxPackages-cachyos-latest-x86_64-v3;
 
 hardware.firmware = [
   (pkgs.stdenv.mkDerivation {
@@ -56,6 +54,16 @@ hardware.firmware = [
   # Enable networking
   networking.networkmanager.enable = true;
 
+  # some shenanigans for my mouse lmao
+services.udev.extraRules = ''
+  KERNEL=="hidraw*", SUBSYSTEM=="hidraw", \
+    ATTRS{idVendor}=="a8a4", \
+    ATTRS{idProduct}=="2255", \
+    MODE="0660", \
+    GROUP="input"
+'';
+
+
   # Set your time zone.
   time.timeZone = "Asia/Jakarta";
 
@@ -68,7 +76,13 @@ hardware.firmware = [
 
   # Enable the KDE Plasma Desktop Environment.
   services.displayManager.sddm.enable = true;
-  services.desktopManager.plasma6.enable = true;
+  services.desktopManager.plasma6.enable = false;
+
+  # Enable the XFCE desktop environment
+  services.xserver.desktopManager.xfce.enable = true;
+
+  # Enable the WindowMaker window manager
+  services.xserver.windowManager.windowmaker.enable = true; 
 
   # Configure keymap in X11
   services.xserver.xkb = {
@@ -102,7 +116,7 @@ hardware.firmware = [
   users.users."phloria" = {
     isNormalUser = true;
     description = "phloria";
-    extraGroups = [ "networkmanager" "wheel" "gamemode" ];
+    extraGroups = [ "networkmanager" "wheel" "gamemode" "input" ];
    
     shell = pkgs.fish;
     
@@ -113,7 +127,7 @@ hardware.firmware = [
   };
 
   # Install firefox.
-  programs.firefox.enable = true;
+  programs.firefox.enable = false;
 
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
@@ -165,6 +179,7 @@ programs.nix-ld.enable = true;
 
 
 
+
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
@@ -174,8 +189,7 @@ programs.nix-ld.enable = true;
     alsa-tools
     lutris
     heroic
-    vesktop
-    protonplus
+    protonup-qt
     tuned
     os-prober
     gcc
@@ -204,8 +218,43 @@ programs.nix-ld.enable = true;
     ntfs3g
     unrar
     mpv
-  ];
-
+    inputs.helium-browser.packages.${system}.default
+    vscode
+    protonplus
+    kdePackages.kgamma
+    goofcord
+    wezterm
+    xfce4-whiskermenu-plugin
+    flameshot
+    android-tools
+    universal-android-debloater
+    scrcpy
+    inputs.zen-browser.packages.${system}.default
+    easyeffects
+    btop
+    peazip
+    unzip
+    windowmaker
+    dockapps.AlsaMixer-app
+    dockapps.wmCalClock
+    dockapps.wmcube
+    dockapps.wmsm-app
+    dockapps.wmsystemtray
+    xorg.xwininfo
+    pavucontrol
+    dunst
+    sxhkd
+    pulseaudio
+    libnotify
+    bpftrace
+    pamixer
+    flowblade
+    kdePackages.kdenlive
+    teams-for-linux
+ (callPackage ./packages/wmclock.nix {})
+ (callPackage ./wmbatteries.nix {})
+ (callPackage ./wmnd.nix{})
+];
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
   # programs.mtr.enable = true;

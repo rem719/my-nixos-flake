@@ -1,0 +1,64 @@
+diff --git a/src/event.c b/src/event.c
+index 67d3009..78e50c0 100644
+--- a/src/event.c
++++ b/src/event.c
+@@ -579,10 +579,8 @@ static void handleExtensions(XEvent * event)
+ 		/* From xrandr man page: "Clients must call back into Xlib using
+ 		 * XRRUpdateConfiguration when screen configuration change notify
+ 		 * events are generated */
+-		XRRUpdateConfiguration(event);
+-		WCHANGE_STATE(WSTATE_RESTARTING);
+-		Shutdown(WSRestartPreparationMode);
+-		Restart(NULL,True);
++            XRRUpdateConfiguration(event);
++            wRefreshXinerama(wScreenForRootWindow(DefaultRootWindow(dpy)));
+ 	}
+ #endif
+ }
+diff --git a/src/xinerama.c b/src/xinerama.c
+index bb7412f..a7a754a 100644
+--- a/src/xinerama.c
++++ b/src/xinerama.c
+@@ -85,6 +85,30 @@ void wInitXinerama(WScreen * scr)
+ #endif				/* USE_XINERAMA */
+ }
+ 
++
++void wRefreshXinerama(WScreen * scr)
++{
++        int old_heads = wXineramaHeads(scr);
++        int new_heads;
++
++        wfree(scr->xine_info.screens);
++        scr->xine_info.screens = NULL;
++        scr->xine_info.count = 0;
++
++        wInitXinerama(scr);
++
++        new_heads = wXineramaHeads(scr);
++
++        if (new_heads != old_heads) {
++                scr->usableArea = wrealloc(scr->usableArea,
++                        sizeof(WArea) * new_heads);
++                scr->totalUsableArea = wrealloc(scr->totalUsableArea,
++                        sizeof(WArea) * new_heads);
++        }
++
++        wScreenUpdateUsableArea(scr);
++}
++
+ int wGetRectPlacementInfo(WScreen * scr, WMRect rect, int *flags)
+ {
+ 	int best;
+diff --git a/src/xinerama.h b/src/xinerama.h
+index e606b5a..edcf35b 100644
+--- a/src/xinerama.h
++++ b/src/xinerama.h
+@@ -27,6 +27,7 @@
+ #include <WINGs/WINGs.h>
+ 
+ void wInitXinerama(WScreen *scr);
++void wRefreshXinerama(WScreen *scr);
+ 
+ #define wXineramaHeads(scr) ((scr)->xine_info.count ? (scr)->xine_info.count : 1)
+ 
