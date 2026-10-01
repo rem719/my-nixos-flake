@@ -258,6 +258,7 @@ programs.nix-ld.enable = true;
     ani-cli
     protontricks
     winetricks
+    gh
  (callPackage ./packages/wmclock.nix {})
  (callPackage ./wmbatteries.nix {})
  (callPackage ./wmnd.nix{})
