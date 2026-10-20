@@ -1,15 +1,15 @@
-{ lib
-, stdenv
-, fetchurl
-, autoreconfHook
-, pkg-config
-, libX11
-, libXext
-, libXpm
-, autoconf
-, automake
+{
+  lib,
+  stdenv,
+  fetchurl,
+  autoreconfHook,
+  pkg-config,
+  libX11,
+  libXext,
+  libXpm,
+  autoconf,
+  automake,
 }:
-
 stdenv.mkDerivation rec {
   pname = "wmclock";
   version = "1.0.16";
@@ -20,10 +20,9 @@ stdenv.mkDerivation rec {
   };
 
   nativeBuildInputs = [
-     autoconf
-     automake
-     pkg-config
-
+    autoconf
+    automake
+    pkg-config
   ];
 
   buildInputs = [
@@ -32,7 +31,7 @@ stdenv.mkDerivation rec {
     libXpm
   ];
 
-configurePhase = ''
+  configurePhase = ''
     autoreconf -fi
     ./configure --prefix=$out
   '';

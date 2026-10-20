@@ -1,11 +1,11 @@
-{ lib
-, stdenv
-, fetchFromGitHub
-, autoreconfHook
-, pkg-config
-, xorg
+{
+  lib,
+  stdenv,
+  fetchFromGitHub,
+  autoreconfHook,
+  pkg-config,
+  xorg,
 }:
-
 stdenv.mkDerivation rec {
   pname = "wmbatteries";
   version = "0.1.7"; # Latest version mentioned in the repo
@@ -13,9 +13,9 @@ stdenv.mkDerivation rec {
   src = fetchFromGitHub {
     owner = "tarjanm-movidius";
     repo = "wmbatteries";
-    rev = "master"; 
+    rev = "master";
     # We leave the hash empty so Nix can calculate it for us during the first build attempt
-    hash = "sha256-0KQ+JmWvBWkmbX0YQh8wOoKDofj/fqaMTuOMheJwq6w="; 
+    hash = "sha256-0KQ+JmWvBWkmbX0YQh8wOoKDofj/fqaMTuOMheJwq6w=";
   };
 
   # nativeBuildInputs are tools used to build the software

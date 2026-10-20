@@ -1,12 +1,12 @@
-{ lib
-, stdenv
-, fetchurl
-, pkg-config
-, libx11
-, libxext
-, libxpm
+{
+  lib,
+  stdenv,
+  fetchurl,
+  pkg-config,
+  libx11,
+  libxext,
+  libxpm,
 }:
-
 stdenv.mkDerivation rec {
   pname = "wmnd";
   version = "0.4.18";
