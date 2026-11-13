@@ -217,7 +217,6 @@
     file
     patch
     which
-    muffon
     osu-lazer-bin
     obs-studio
     ppsspp
