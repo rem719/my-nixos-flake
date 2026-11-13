@@ -13,23 +13,22 @@
   imports = [
     # Include the results of the hardware scan.
     ./hardware-configuration.nix
+    ./dstx.nix
   ];
 
-  # GRUB/Systemd Bootloader. (pls for the love of god remove the grub stuff first before enabling the systemd service back)
+  # Enable GRUB and disable systemd-boot god i fucking hate systemd so fucking much
   boot.loader.systemd-boot.enable = false;
-
   boot.loader.grub = {
     enable = true;
     efiSupport = true;
     device = "nodev";
-    useOSProber = true; # finds Windows automatically
-    efiInstallAsRemovable = true;
+    useOSProber = true; # Automatically detects Windows installations
+    efiInstallAsRemovable = false; # Fallback EFI binary setup
   };
-
-  boot.loader.efi.canTouchEfiVariables = false;
+  boot.loader.efi.canTouchEfiVariables = true; # Registers GRUB in NVRAM
 
   # Use latest kernel.
-  boot.kernelPackages = pkgs.cachyosKernels.linuxPackages-cachyos-bore-x86_64-v3;
+  boot.kernelPackages = pkgs.linuxPackages_latest;
 
   hardware.firmware = [
     (pkgs.stdenv.mkDerivation {
@@ -59,6 +58,9 @@
   # Enable networking
   networking.networkmanager.enable = true;
 
+  # Enable Bluetooth
+  hardware.bluetooth.enable = true;
+
   # some shenanigans for my mouse lmao
   services.udev.extraRules = ''
     KERNEL=="hidraw*", SUBSYSTEM=="hidraw", \
@@ -79,8 +81,8 @@
   services.xserver.enable = true;
 
   # Enable the KDE Plasma Desktop Environment.
-  services.displayManager.sddm.enable = false;
-  services.desktopManager.plasma6.enable = false;
+  services.displayManager.sddm.enable = true;
+  services.desktopManager.plasma6.enable = true;
 
   # Enable the XFCE desktop environment
   services.xserver.desktopManager.xfce.enable = true;
@@ -96,8 +98,8 @@
   services.system76-scheduler.enable = false;
 
   # Enable GNOME
-  services.displayManager.gdm.enable = true;
-  services.desktopManager.gnome.enable = true;
+  services.displayManager.gdm.enable = false;
+  services.desktopManager.gnome.enable = false;
 
   # Configure keymap in X11
   services.xserver.xkb = {
@@ -178,6 +180,7 @@
   services.tuned.enable = true;
 
   # le experimental features
+
   nix.settings = {
     experimental-features = ["nix-command" "flakes"];
 
@@ -197,7 +200,6 @@
     wget
     fastfetch
     alsa-tools
-    lutris
     heroic
     protonup-qt
     tuned
@@ -262,9 +264,13 @@
     winetricks
     gh
     appflowy
-    gnome-tweaks
-    mangohud
     pkgs.python313Packages.ds4drv
+    efibootmgr
+    goverlay
+    overskride
+    openjdk25
+    netbeans
+    ryzenadj
   ];
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
